@@ -45,7 +45,7 @@ std::vector<Entity> CheatFunctions::GetEntities() {
             continue;
         }
 
-        char name[64];
+        char name[64] = "Unknown"; // Initialize name to a default value
         ReadProcessMemory(processHandle, (LPCVOID)(entityAddress + offsets::human_type::object_name), &name, sizeof(name), NULL);
         entities.push_back({ entityAddress, entityPosition, std::string(name) });
     }
@@ -61,9 +61,11 @@ vector3_t CheatFunctions::GetCoordinate(uintptr_t entityAddress) {
 
 void CheatFunctions::RenderEntities(const std::vector<Entity>& entities) {
     for (const auto& entity : entities) {
+        // Ensure the entity name is not empty
+        std::string entityName = entity.name.empty() ? "Unknown" : entity.name;
         ImGui::SetNextWindowPos(ImVec2(entity.position.x, entity.position.y), ImGuiCond_Always);
-        ImGui::Begin(entity.name.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings);
-        ImGui::Text("Player: %s\nPosition: (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
+        ImGui::Begin(entityName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings);
+        ImGui::Text("Player: %s\nPosition: (%.1f, %.1f, %.1f)", entityName.c_str(), entity.position.x, entity.position.y, entity.position.z);
         ImGui::End();
     }
 }

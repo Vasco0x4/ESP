@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
+#include "transformater.hpp"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -24,7 +25,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
     const wchar_t CLASS_NAME[] = L"ESPOverlayWindow";
 
-    WNDCLASS wc = { };
+    WNDCLASS wc = {};
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
@@ -95,13 +96,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         return 1;
     }
 
-    std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << std::dec << "\n";
+    std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << "\n";
 
-    CheatFunctions cheat(processHandle, gameBaseAddress);
+    CheatFunctions cheat(processHandle, gameBaseAddress, hwnd);
 
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    MSG msg = { };
+    MSG msg = {};
     while (true) {
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
@@ -114,12 +115,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // Debug Menu with increased size
-        ImGui::SetNextWindowSize(ImVec2(400, 600), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Debug Menu");
+        ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("ESP Overlay Active");
 
-        // Debug message
         std::cout << "Fetching entities...\n";
 
         std::vector<Entity> entities = cheat.GetEntities();
@@ -127,8 +125,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         for (const auto& entity : entities) {
             ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
             std::cout << "Entity: " << entity.name << " at (" << entity.position.x << ", " << entity.position.y << ", " << entity.position.z << ")\n";
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Sleep  between entities best 100 for final
         }
+
+        cheat.RenderEntities(entities);
 
         ImGui::End();
 
@@ -138,6 +137,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         g_pSwapChain->Present(1, 0);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Sleep for 1 second between updates
     }
 
     std::cout << "Cleaning up ImGui and DirectX.\n";

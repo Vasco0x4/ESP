@@ -1,8 +1,7 @@
 #pragma once
-
 #include <vector>
 #include <string>
-#include <windows.h>
+#include <Windows.h>
 #include "vector3.hpp"
 
 struct Entity {
@@ -13,7 +12,7 @@ struct Entity {
 
 class CheatFunctions {
 public:
-    CheatFunctions(HANDLE processHandle, uintptr_t gameBaseAddress);
+    CheatFunctions(HANDLE processHandle, uintptr_t gameBaseAddress, HWND hwnd);
 
     std::vector<Entity> GetEntities();
     vector3_t GetCoordinate(uintptr_t entityAddress);
@@ -22,4 +21,5 @@ public:
 private:
     HANDLE processHandle;
     uintptr_t gameBaseAddress;
+    HWND hwnd;
 };

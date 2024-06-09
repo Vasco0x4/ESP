@@ -56,6 +56,9 @@
     <ClInclude Include="ImGuiSetup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="transformater.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vendor\ImGui\imgui.cpp">
@@ -95,6 +98,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImGuiSetup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="transformater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

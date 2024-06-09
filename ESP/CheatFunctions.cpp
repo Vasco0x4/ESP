@@ -2,10 +2,11 @@
 #include "memory.hpp"
 #include "imgui.h"
 #include "offsets.hpp"
+#include "transformater.hpp"
 #include <iostream>
 
-CheatFunctions::CheatFunctions(HANDLE processHandle, uintptr_t gameBaseAddress)
-    : processHandle(processHandle), gameBaseAddress(gameBaseAddress) {}
+CheatFunctions::CheatFunctions(HANDLE processHandle, uintptr_t gameBaseAddress, HWND hwnd)
+    : processHandle(processHandle), gameBaseAddress(gameBaseAddress), hwnd(hwnd) {}
 
 std::vector<Entity> CheatFunctions::GetEntities() {
     std::vector<Entity> entities;
@@ -38,7 +39,7 @@ std::vector<Entity> CheatFunctions::GetEntities() {
         }
 
         vector3_t entityPosition = GetCoordinate(entityAddress);
-        std::cout << "Position read: (" << entityPosition.x << ", " << entityPosition.y << ", " << entityPosition.z << ")" << std::endl;
+        std::cout << "Coordinate for entity " << std::hex << entityAddress << ": (" << entityPosition.x << ", " << entityPosition.y << ", " << entityPosition.z << ")\n";
 
         if (entityPosition.x == 0 && entityPosition.y == 0 && entityPosition.z == 0) {
             std::cout << "Invalid position for entity " << std::hex << entityAddress << std::dec << std::endl;
@@ -55,17 +56,29 @@ std::vector<Entity> CheatFunctions::GetEntities() {
 
 vector3_t CheatFunctions::GetCoordinate(uintptr_t entityAddress) {
     uintptr_t visualState = memory::read_memory<uintptr_t>(processHandle, entityAddress + offsets::human::visual_state);
+    if (visualState == 0) {
+        std::cerr << "Invalid visual state address for entity " << std::hex << entityAddress << std::dec << std::endl;
+        return vector3_t(0, 0, 0);
+    }
     vector3_t position = memory::read_memory<vector3_t>(processHandle, visualState + 0x2C);
+    std::cout << "Coordinate for entity " << std::hex << entityAddress << ": (" << position.x << ", " << position.y << ", " << position.z << ")\n";
     return position;
 }
 
 void CheatFunctions::RenderEntities(const std::vector<Entity>& entities) {
     for (const auto& entity : entities) {
-        // Ensure the entity name is not empty
         std::string entityName = entity.name.empty() ? "Unknown" : entity.name;
-        ImGui::SetNextWindowPos(ImVec2(entity.position.x, entity.position.y), ImGuiCond_Always);
-        ImGui::Begin(entityName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings);
-        ImGui::Text("Player: %s\nPosition: (%.1f, %.1f, %.1f)", entityName.c_str(), entity.position.x, entity.position.y, entity.position.z);
-        ImGui::End();
+        vector3_t screen_pos;
+        if (world_to_screen(processHandle, gameBaseAddress, entity.position, screen_pos, hwnd)) {
+            std::cout << "Screen Position: (" << screen_pos.x << ", " << screen_pos.y << ")\n";
+            ImGui::SetNextWindowPos(ImVec2(screen_pos.x, screen_pos.y), ImGuiCond_Always);
+            ImGui::Begin(entityName.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings);
+            ImGui::Text("Entity: %s\nPosition: (%.1f, %.1f)", entityName.c_str(), screen_pos.x, screen_pos.y);
+            ImGui::End();
+            std::cout << "Entity: " << entityName << " at (" << screen_pos.x << ", " << screen_pos.y << ")\n";
+        }
+        else {
+            std::cout << "Entity " << entityName << " is not on screen.\n";
+        }
     }
 }

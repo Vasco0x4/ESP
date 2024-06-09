@@ -1,5 +1,4 @@
-#ifndef CHEAT_FUNCTIONS_HPP
-#define CHEAT_FUNCTIONS_HPP
+#pragma once
 
 #include <vector>
 #include <string>
@@ -15,12 +14,12 @@ struct Entity {
 class CheatFunctions {
 public:
     CheatFunctions(HANDLE processHandle, uintptr_t gameBaseAddress);
+
     std::vector<Entity> GetEntities();
-    vector3_t GetCoordinate(uint64_t entityAddress);
+    vector3_t GetCoordinate(uintptr_t entityAddress);
+    void RenderEntities(const std::vector<Entity>& entities);
 
 private:
     HANDLE processHandle;
     uintptr_t gameBaseAddress;
 };
-
-#endif // CHEAT_FUNCTIONS_HPP

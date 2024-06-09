@@ -113,9 +113,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        // Debug Menu
         ImGui::Begin("Debug Menu");
         ImGui::Text("ESP Overlay Active");
 
+        // Debug message
         std::cout << "Fetching entities...\n";
 
         std::vector<Entity> entities = cheat.GetEntities();
@@ -124,6 +126,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
             ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
             std::cout << "Entity: " << entity.name << " at (" << entity.position.x << ", " << entity.position.y << ", " << entity.position.z << ")\n";
         }
+
+        cheat.RenderEntities(entities);
 
         ImGui::End();
 

@@ -4,11 +4,11 @@ namespace offsets {
     namespace world {
         constexpr auto world = 0x4169C58;
         constexpr auto near_entity_table = 0xF48;
-        constexpr auto near_entity_table_size = near_entity_table + 0x8;
+        constexpr auto near_entity_table_size = 0xF50;
         constexpr auto far_entity_table = 0x1090;
-        constexpr auto far_entity_table_size = far_entity_table + 0x8;
+        constexpr auto far_entity_table_size = 0x1098;
         constexpr auto bullet_table = 0xE00;
-        constexpr auto bullet_table_size = bullet_table + 0x8;
+        constexpr auto bullet_table_size = 0xE08;
         constexpr auto local_player = 0x2960;
         constexpr auto camera = 0x1B8;
     }

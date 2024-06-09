@@ -1,5 +1,6 @@
 #include "CheatFunctions.hpp"
 #include "memory.hpp"
+#include "imgui.h"
 #include "offsets.hpp"
 #include <iostream>
 
@@ -10,54 +11,59 @@ std::vector<Entity> CheatFunctions::GetEntities() {
     std::vector<Entity> entities;
 
     uintptr_t worldAddress = memory::read_memory<uintptr_t>(processHandle, gameBaseAddress + offsets::world::world);
-    std::cout << "World Address: " << std::hex << worldAddress << std::endl;
+    std::cout << "World Address: " << std::hex << worldAddress << std::dec << std::endl;
 
     if (worldAddress == 0) {
-        std::cerr << "Invalid world address" << std::endl;
+        std::cerr << "Failed to read world address." << std::endl;
         return entities;
     }
 
-    size_t entityCount = memory::read_memory<size_t>(processHandle, worldAddress + offsets::world::near_entity_table_size);
+    uint32_t entityCount = memory::read_memory<uint32_t>(processHandle, worldAddress + offsets::world::near_entity_table_size);
     std::cout << "Entity Count: " << entityCount << std::endl;
 
-    if (entityCount == 0 || entityCount > 10000) {  // Check for a reasonable entity count
-        std::cerr << "Invalid entity count: " << entityCount << std::endl;
+    if (entityCount > 1000) {  // check if the count is a reasonable number
+        std::cout << "Invalid entity count: " << entityCount << std::endl;
         return entities;
     }
 
     uintptr_t entityListBase = memory::read_memory<uintptr_t>(processHandle, worldAddress + offsets::world::near_entity_table);
-    std::cout << "Entity List Base: " << std::hex << entityListBase << std::endl;
+    std::cout << "Near Entity Table Base: " << std::hex << entityListBase << std::dec << std::endl;
 
-    for (int i = 0; i < entityCount; i++) {
-        uint64_t entityAddress = memory::read_memory<uint64_t>(processHandle, entityListBase + (i * 0x8));
-        std::cout << "Entity address [" << std::hex << i << "]: " << entityAddress << std::endl;
+    for (size_t i = 0; i < entityCount; i++) {
+        uintptr_t entityAddress = memory::read_memory<uintptr_t>(processHandle, entityListBase + i * sizeof(uintptr_t));
+        std::cout << "Entity address [" << i << "]: " << std::hex << entityAddress << std::dec << std::endl;
 
         if (entityAddress == 0) {
-            continue; // Skip if address is null
+            continue;
         }
 
         vector3_t entityPosition = GetCoordinate(entityAddress);
         std::cout << "Position read: (" << entityPosition.x << ", " << entityPosition.y << ", " << entityPosition.z << ")" << std::endl;
 
         if (entityPosition.x == 0 && entityPosition.y == 0 && entityPosition.z == 0) {
-            std::cerr << "Invalid position for entity " << std::hex << entityAddress << std::endl;
-            continue; // Skip if position is invalid
+            std::cout << "Invalid position for entity " << std::hex << entityAddress << std::dec << std::endl;
+            continue;
         }
 
-        char name[64] = { 0 };
-        if (!ReadProcessMemory(processHandle, (LPCVOID)(entityAddress + offsets::human_type::object_name), &name, sizeof(name), NULL)) {
-            std::cerr << "Failed to read name for entity " << std::hex << entityAddress << std::endl;
-            continue; // Skip if name reading fails
-        }
+        char name[64];
+        ReadProcessMemory(processHandle, (LPCVOID)(entityAddress + offsets::human_type::object_name), &name, sizeof(name), NULL);
         entities.push_back({ entityAddress, entityPosition, std::string(name) });
-
-        std::cout << "Entity " << std::hex << entityAddress << ": " << name << " at (" << entityPosition.x << ", " << entityPosition.y << ", " << entityPosition.z << ")\n";
     }
 
     return entities;
 }
 
-vector3_t CheatFunctions::GetCoordinate(uint64_t entityAddress) {
-    uint64_t visualStateAddress = memory::read_memory<uint64_t>(processHandle, entityAddress + offsets::human::visual_state);
-    return memory::read_memory<vector3_t>(processHandle, visualStateAddress + 0x2C);
+vector3_t CheatFunctions::GetCoordinate(uintptr_t entityAddress) {
+    uintptr_t visualState = memory::read_memory<uintptr_t>(processHandle, entityAddress + offsets::human::visual_state);
+    vector3_t position = memory::read_memory<vector3_t>(processHandle, visualState + 0x2C);
+    return position;
+}
+
+void CheatFunctions::RenderEntities(const std::vector<Entity>& entities) {
+    for (const auto& entity : entities) {
+        ImGui::SetNextWindowPos(ImVec2(entity.position.x, entity.position.y), ImGuiCond_Always);
+        ImGui::Begin(entity.name.c_str(), nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings);
+        ImGui::Text("Player: %s\nPosition: (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
+        ImGui::End();
+    }
 }

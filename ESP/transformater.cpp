@@ -2,6 +2,7 @@
 #include "transformater.hpp"
 #include "offsets.hpp"
 #include <iostream>
+#include <vector> // Inclure <vector> pour std::vector
 #include <windows.h>
 
 vector3_t transform_coordinate(const vector3_t& coord, const matrix_t& matrix) {
@@ -22,16 +23,42 @@ vector3_t transform_coordinate(const vector3_t& coord, const matrix_t& matrix) {
     return transformed_coord;
 }
 
+void print_memory(HANDLE process, uintptr_t address, size_t size) {
+    std::vector<uint8_t> buffer(size);
+    SIZE_T bytesRead;
+    if (ReadProcessMemory(process, reinterpret_cast<LPCVOID>(address), buffer.data(), size, &bytesRead) && bytesRead == size) {
+        std::cout << "Memory at address " << std::hex << address << ":\n";
+        for (size_t i = 0; i < size; ++i) {
+            std::cout << std::hex << static_cast<int>(buffer[i]) << " ";
+            if ((i + 1) % 16 == 0) std::cout << "\n";
+        }
+        std::cout << std::dec << std::endl;
+    }
+    else {
+        std::cerr << "Failed to read memory at address " << std::hex << address << std::dec << std::endl;
+    }
+}
+
 bool world_to_screen(HANDLE processHandle, uintptr_t gameBaseAddress, const vector3_t& world_coord, vector3_t& screen_coord, HWND hwnd) {
     uintptr_t cameraAddress = memory::read_memory<uintptr_t>(processHandle, gameBaseAddress + offsets::world::camera);
+    if (cameraAddress == 0) {
+        std::cerr << "Invalid camera address: " << std::hex << cameraAddress << std::dec << std::endl;
+        return false;
+    }
+
     uintptr_t viewProjectionAddress = cameraAddress + offsets::camera::view_projection;
+
+    // Print raw memory at the view projection matrix address
+    print_memory(processHandle, viewProjectionAddress, sizeof(matrix_t));
+
     matrix_t view_projection = memory::read_memory<matrix_t>(processHandle, viewProjectionAddress);
 
-    // Vérifier si la matrice est valide
+    // Verify if the matrix is valid
     bool valid = true;
     for (int i = 0; i < 16; ++i) {
         if (isnan(view_projection.m[i]) || isinf(view_projection.m[i])) {
             valid = false;
+            std::cerr << "Invalid matrix value at index " << i << ": " << view_projection.m[i] << std::endl;
             break;
         }
     }
@@ -55,5 +82,9 @@ bool world_to_screen(HANDLE processHandle, uintptr_t gameBaseAddress, const vect
     screen_coord.x = rect.left + (rect.right - rect.left) / 2 * (1 + transformed_coord.x);
     screen_coord.y = rect.top + (rect.bottom - rect.top) / 2 * (1 - transformed_coord.y);
 
+    std::cout << "Transformed Coord: (" << transformed_coord.x << ", " << transformed_coord.y << ", " << transformed_coord.z << ")\n";
+    std::cout << "Screen Coord: (" << screen_coord.x << ", " << screen_coord.y << ")\n";
+
     return transformed_coord.z > 0.1f;
 }
+

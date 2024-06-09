@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <iostream>
+#include <thread>
 #include "memory.hpp"
 #include "Graphics.h"
 #include "ImGuiSetup.h"
@@ -94,7 +95,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         return 1;
     }
 
-    std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << "\n";
+    std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << std::dec << "\n";
 
     CheatFunctions cheat(processHandle, gameBaseAddress);
 
@@ -113,7 +114,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // Debug Menu
+        // Debug Menu with increased size
+        ImGui::SetNextWindowSize(ImVec2(400, 600), ImGuiCond_FirstUseEver);
         ImGui::Begin("Debug Menu");
         ImGui::Text("ESP Overlay Active");
 
@@ -125,9 +127,8 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         for (const auto& entity : entities) {
             ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
             std::cout << "Entity: " << entity.name << " at (" << entity.position.x << ", " << entity.position.y << ", " << entity.position.z << ")\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Sleep  between entities best 100 for final
         }
-
-        cheat.RenderEntities(entities);
 
         ImGui::End();
 

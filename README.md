@@ -22,7 +22,7 @@ Les offsets sont basés sur la version 1.25 de la version officielle de DayZ. Le
 ### CheatFunctions.hpp & CheatFunctions.cpp
 - Gestion des fonctions incluant  l'affichage des entités.
 
-###vector3.hpp & vector3.cpp
+### vector3.hpp & vector3.cpp
 - Gestion des vecteurs 3D pour représenter les positions des entités.
 
 ### main.cpp

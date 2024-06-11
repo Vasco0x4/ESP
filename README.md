@@ -10,5 +10,26 @@ Les offsets sont basés sur la version 1.25 de la version officielle de DayZ. Le
 
 ![Screenshot_4](https://github.com/Unknow-kernel/ESP/assets/63432221/7598be5f-3e06-4f2e-a174-51712c1c89e4)
 
+### memory.hpp & memory.cpp
+- fonctions pour lire et écrire dans la mémoire du processus du jeu.
+
+### Graphics.h & Graphics.cpp
+- DirectX et gestion du rendu.
+
+### ImGuiSetup.h & ImGuiSetup.cpp
+- ImGui pour l'interface utilisateur.
+
+### CheatFunctions.hpp & CheatFunctions.cpp
+- Gestion des fonctions incluant  l'affichage des entités.
+
+###vector3.hpp & vector3.cpp
+- Gestion des vecteurs 3D pour représenter les positions des entités.
+
+### main.cpp
+- Point d'entrée principal, initialise la fenêtre, DirectX, ImGui, et boucle principale.
+
+### offsets.hpp
+-  offsets utilisés pour accéder aux structures de données spécifiques dans la mémoire du jeu.
+
 ## Disclaimer
-Le projet ne possède aucun moyen de contourner l'anti-cheat. Par conséquent, il reste à but éducatif. Le lancer sans désactiver BattlEye vous entraînera simplement un bannissement.
+Le projet ne possède aucun moyen de contourner Battle eyes. Par conséquent, il reste à but éducatif. Le lancer sans désactiver BattlEye vous entraînera simplement un bannissement.

@@ -143,6 +143,7 @@
     <ClInclude Include="ImGuiSetup.h" />
     <ClInclude Include="Memory.hpp" />
     <ClInclude Include="offsets.hpp" />
+    <ClInclude Include="transformater.hpp" />
     <ClInclude Include="vector3.hpp" />
     <ClInclude Include="Vendor\ImGui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="Vendor\ImGui\backends\imgui_impl_win32.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="ImGuiSetup.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="transformater.cpp" />
     <ClCompile Include="vector3.cpp" />
     <ClCompile Include="Vendor\ImGui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="Vendor\ImGui\backends\imgui_impl_win32.cpp" />

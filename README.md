@@ -9,9 +9,7 @@ The offsets are based on version 1.25 of the official DayZ version. Offsets chan
 ![image](https://github.com/Unknow-kernel/ESP/assets/63432221/63207782-4e37-42f7-a949-9b2f0c0c7f32)
 
 
-![Screenshot_3](https://github.com/Unknow-kernel/ESP/assets/63432221/e107574e-8b89-487f-b0de-1aea52ff4d01)
-
-![Screenshot_4](https://github.com/Unknow-kernel/ESP/assets/63432221/7598be5f-3e06-4f2e-a174-51712c1c89e4)
+![image](https://github.com/Unknow-kernel/ESP/assets/63432221/4e668744-e420-4741-9756-d39940e7dc78)
 
 
 ### memory.hpp & memory.cpp 

@@ -1,4 +1,4 @@
-# Dayz simple esp 
+# Dayz Simple ESP 
 
 Un projet simple permettant de comprendre les bases du reverse engineering sur la mémoire afin de récupérer les bons offsets.
 

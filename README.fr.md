@@ -6,10 +6,6 @@ Ce projet est basé sur le jeu DayZ en mode hors ligne. Il récupère les entit�
 
 Les offsets sont basés sur la version 1.25 de la version officielle de DayZ. Les offsets changent à chaque version.
 
-![Screenshot_3](https://github.com/Unknow-kernel/ESP/assets/63432221/e107574e-8b89-487f-b0de-1aea52ff4d01)
-
-![Screenshot_4](https://github.com/Unknow-kernel/ESP/assets/63432221/7598be5f-3e06-4f2e-a174-51712c1c89e4)
-
 ### memory.hpp & memory.cpp
 - fonctions pour lire et écrire dans la mémoire du processus du jeu.
 

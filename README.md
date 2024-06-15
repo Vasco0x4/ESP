@@ -29,5 +29,10 @@ The offsets are based on version 1.25 of the official DayZ version. Offsets chan
 
 ### offsets.hpp 
 - Offsets used to access specific data structures in the game's memory.
+  
 ## Disclaimer
 The project has no means to bypass BattleEye. Therefore, it is for educational purposes only. Running it without disabling BattleEye will simply result in a ban.
+
+## Translations
+
+- [Français (French)](README.fr.md)

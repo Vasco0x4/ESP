@@ -5,6 +5,7 @@
 #include "Graphics.h"
 #include "ImGuiSetup.h"
 #include "CheatFunctions.hpp"
+#include "MiniMap.hpp"
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
@@ -99,8 +100,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << "\n";
 
     CheatFunctions cheat(processHandle, gameBaseAddress, hwnd);
+    MiniMap miniMap(200.0f, 200.0f); // size
 
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    bool showEntityDebug = true;
 
     MSG msg = {};
     while (true) {
@@ -115,21 +119,30 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("ESP Overlay Active");
+        if (ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse)) {
+            ImGui::Text("ESP Overlay Active");
+            ImGui::Checkbox("Entity Debug", &showEntityDebug);
 
-        std::cout << "Fetching entities...\n";
+            std::vector<Entity> entities = cheat.GetEntities();
 
-        std::vector<Entity> entities = cheat.GetEntities();
-        ImGui::Text("Entities found: %d", entities.size());
-        for (const auto& entity : entities) {
-            ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
-            std::cout << "Entity: " << entity.name << " at (" << entity.position.x << ", " << entity.position.y << ", " << entity.position.z << ")\n";
+            if (!entities.empty()) {
+                vector3_t playerPosition = entities[0].position;
+                entities.erase(entities.begin()); // Remove the first entity (player) to avoid duplication
+
+                ImGui::Text("Player Position: (%.1f, %.1f, %.1f)", playerPosition.x, playerPosition.y, playerPosition.z);
+                ImGui::Text("Entities found: %d", entities.size());
+                for (const auto& entity : entities) {
+                    ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
+                }
+
+                miniMap.Render(playerPosition, entities);
+            }
+            else {
+                ImGui::Text("No entities found.");
+            }
+
+            ImGui::End();
         }
-
-        cheat.RenderEntities(entities);
-
-        ImGui::End();
 
         ImGui::Render();
         const float clear_color_with_alpha[4] = { clear_color.x, clear_color.y, clear_color.z, clear_color.w };
@@ -138,7 +151,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         g_pSwapChain->Present(1, 0);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Sleep for 1 second between updates
+        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // Sleep between updates
     }
 
     std::cout << "Cleaning up ImGui and DirectX.\n";

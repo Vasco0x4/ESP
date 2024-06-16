@@ -37,8 +37,12 @@ std::vector<Entity> CheatFunctions::GetEntities() {
             continue;
         }
 
-        char name[64] = "Unknown";
-        ReadProcessMemory(processHandle, (LPCVOID)(entityAddress + offsets::human_type::object_name), &name, sizeof(name), NULL);
+        char name[64];
+        if (!ReadProcessMemory(processHandle, (LPCVOID)(entityAddress + offsets::human_type::object_name), &name, sizeof(name), NULL)) {
+            std::cerr << "Failed to read entity name for entity " << std::hex << entityAddress << std::dec << std::endl;
+            continue;
+        }
+        name[sizeof(name) - 1] = '\0'; // Ensure null-termination
         entities.push_back({ entityAddress, entityPosition, std::string(name) });
     }
 

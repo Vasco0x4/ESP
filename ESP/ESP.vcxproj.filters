@@ -62,6 +62,12 @@
     <ClInclude Include="MiniMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vendor\ImGui\imgui.cpp">
@@ -100,13 +106,19 @@
     <ClCompile Include="Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiSetup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="transformater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MiniMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiSetup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

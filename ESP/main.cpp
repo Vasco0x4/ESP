@@ -10,13 +10,10 @@
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 #include "transformater.hpp"
+#include "Menu.h"
+#include "ImGuiRenderer.h"
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-void SetWindowTransparency(HWND hwnd) {
-    SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-    SetLayeredWindowAttributes(hwnd, RGB(0, 0, 0), 0, LWA_COLORKEY);
-}
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
     AllocConsole();
@@ -38,31 +35,13 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
         return 1;
     }
 
-    HWND hwnd = CreateWindowEx(
-        WS_EX_TOPMOST | WS_EX_TRANSPARENT | WS_EX_LAYERED,
-        CLASS_NAME,
-        L"DayZ ESP Overlay",
-        WS_POPUP,
-        0, 0,
-        GetSystemMetrics(SM_CXSCREEN),
-        GetSystemMetrics(SM_CYSCREEN),
-        NULL,
-        NULL,
-        hInstance,
-        NULL
-    );
-
+    HWND hwnd = CreateOverlayWindow(hInstance, CLASS_NAME, nCmdShow);
     if (!hwnd) {
         std::cerr << "Failed to create window.\n";
         return 1;
     }
 
-    SetWindowTransparency(hwnd);
-
-    ShowWindow(hwnd, nCmdShow);
-    UpdateWindow(hwnd);
-
-    std::cout << "Starting DayZ ESP Mod...\n";
+    std::cout << "Starting DayZ ESP...\n";
 
     if (!InitializeDirectX(hwnd)) {
         std::cerr << "Failed to initialize DirectX.\n";
@@ -100,11 +79,12 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     std::cout << "Base address of DayZ found at: " << std::hex << gameBaseAddress << "\n";
 
     CheatFunctions cheat(processHandle, gameBaseAddress, hwnd);
-    MiniMap miniMap(200.0f, 200.0f); // size
+    MiniMap miniMap(200.0f, 200.0f); // size mini map
 
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    bool showEntityDebug = true;
+    bool showDebugWindow = false; // debug 
+    bool showMiniMap = false; // mini map
 
     MSG msg = {};
     while (true) {
@@ -115,45 +95,27 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
                 break;
         }
 
-        ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
-
-        if (ImGui::Begin("Debug Menu", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse)) {
-            ImGui::Text("ESP Overlay Active");
-            ImGui::Checkbox("Entity Debug", &showEntityDebug);
-
-            std::vector<Entity> entities = cheat.GetEntities();
-
-            if (!entities.empty()) {
-                vector3_t playerPosition = entities[0].position;
-                entities.erase(entities.begin()); // Remove the first entity (player) to avoid duplication
-
-                ImGui::Text("Player Position: (%.1f, %.1f, %.1f)", playerPosition.x, playerPosition.y, playerPosition.z);
-                ImGui::Text("Entities found: %d", entities.size());
-                for (const auto& entity : entities) {
-                    ImGui::Text("Entity: %s at (%.1f, %.1f, %.1f)", entity.name.c_str(), entity.position.x, entity.position.y, entity.position.z);
-                }
-
-                miniMap.Render(playerPosition, entities);
-            }
-            else {
-                ImGui::Text("No entities found.");
-            }
-
-            ImGui::End();
+        if (GetAsyncKeyState(VK_NUMPAD1) & 0x8000) {
+            showDebugWindow = !showDebugWindow;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
+        if (GetAsyncKeyState(VK_NUMPAD2) & 0x8000) {
+            showMiniMap = !showMiniMap;
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
 
-        ImGui::Render();
+        RenderImGui(cheat, miniMap, showDebugWindow, showMiniMap);
+
         const float clear_color_with_alpha[4] = { clear_color.x, clear_color.y, clear_color.z, clear_color.w };
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, NULL);
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color_with_alpha);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         g_pSwapChain->Present(1, 0);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // Sleep between updates
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Sleep between updates
     }
 
+    // Cleanup resources
     std::cout << "Cleaning up ImGui and DirectX.\n";
     CleanupImGui();
     CleanupDirectX();

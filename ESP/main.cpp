@@ -82,7 +82,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     MiniMap miniMap(200.0f, 200.0f); // size mini map
 
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-
     bool showDebugWindow = false; // debug 
     bool showMiniMap = false; // mini map
 
@@ -97,11 +96,11 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
         if (GetAsyncKeyState(VK_NUMPAD1) & 0x8000) {
             showDebugWindow = !showDebugWindow;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); // key delay 
         }
         if (GetAsyncKeyState(VK_NUMPAD2) & 0x8000) {
             showMiniMap = !showMiniMap;
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));// key delay 
         }
 
         RenderImGui(cheat, miniMap, showDebugWindow, showMiniMap);

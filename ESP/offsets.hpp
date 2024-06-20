@@ -2,7 +2,7 @@
 
 namespace offsets {
     namespace world {
-        constexpr auto world = 0x4169C58;
+        constexpr auto world = 0x416AC60; // old '0x4169C58'
         constexpr auto near_entity_table = 0xF48;
         constexpr auto near_entity_table_size = 0xF50;
         constexpr auto far_entity_table = 0x1090;
